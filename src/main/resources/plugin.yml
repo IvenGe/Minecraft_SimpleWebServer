@@ -1,0 +1,7 @@
+name: WebServer
+version: ${project.version}
+main: be.dailysurvival.webserver.WebServer
+api-version: 1.16
+load: STARTUP
+authors: [ Schreiffaut ]
+description: Just a simple web server within a Minecraft Server.
