@@ -1,10 +1,14 @@
 package be.dailysurvival.webserver;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 
-public class Connection implements Runnable{
+public class Connection  implements Runnable {
+    private final FileConfiguration config;
     // The socket used to connect to the server
     private Socket connectionSocket;
     // A HashMap to store the keys/values inside of the client request
@@ -16,8 +20,10 @@ public class Connection implements Runnable{
      * Creates a Connection object
      *
      * @param connectionSocket The socket the client used to connect to the server
+     * @param config
      */
-    public Connection(Socket connectionSocket) {
+    public Connection(Socket connectionSocket, FileConfiguration config) {
+        this.config = config;
 
         this.connectionSocket = connectionSocket;
 
@@ -26,9 +32,9 @@ public class Connection implements Runnable{
 
         // Add key/value pairs to the redirect HashMap
         // The key represents the URL value used by the user and the value is the URL value to redirect to
-        redirect.put("/", "/index.htm");
-        redirect.put("/index.htm", "/index.htm");
-        redirect.put("/index", "/index.htm");
+        redirect.put("/", "/index.html");
+        redirect.put("/index.htm", "/index.html");
+        redirect.put("/index", "/index.html");
     }
 
     /**
@@ -105,7 +111,8 @@ public class Connection implements Runnable{
 
         // Get the file path of the file requested by the client connection and open the requested file
         String resourcePath = request.get("Resource").toString();
-        File file = new File("./plugins/WebServer/" + resourcePath);
+        File file = new File( "./plugins/WebServer/" +config.getString("WebSiteFolder")  + resourcePath);
+
 
         // If the file requested by the client is in the redirect HashMap then send the client a
         // HTTP 301 response and redirect the client to the new file address

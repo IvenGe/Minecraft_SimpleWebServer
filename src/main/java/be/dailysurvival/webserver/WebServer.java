@@ -13,25 +13,27 @@ public final class WebServer extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
-        createFolder("WebServer");
         // Plugin startup logic
-        runnable();
+        getConfig().options().copyDefaults();
+        saveDefaultConfig();
+        createFolder(getConfig().getString("WebSiteFolder"));
         // Listen for new client connections
+        runnable(getConfig().getInt("port"));
+
 
     }
 
     private ServerSocket serverSocket = null;
 
-    public void runnable() {
+    public void runnable(int port) {
 
 
         try {
-            serverSocket = new ServerSocket(80);
+            serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Listening for connections on port 80...");
+        System.out.println("Listening for connections on port" + port);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -39,7 +41,7 @@ public final class WebServer extends JavaPlugin {
                 StartServer();
 
             }
-        }.runTaskTimerAsynchronously(this, 40, 5);
+        }.runTaskTimerAsynchronously(this, 20, 10);
     }
 
     private void StartServer() {
@@ -54,16 +56,16 @@ public final class WebServer extends JavaPlugin {
         }
 
         // Create new thread to handle client request
-        Thread connectionThread = new Thread(new Connection(connectionSocket));
+        Thread connectionThread = new Thread(new Connection(connectionSocket, getConfig()));
 
         // Start the connection thread
         connectionThread.start();
-        System.out.println("New connection on port 80...");
+        System.out.println("New connection");
 
     }
 
     private void createFolder(String name) {
-        File f = new File(this.getDataFolder() + "/");
+        File f = new File(this.getDataFolder() + "/"+ name);
         if(!f.exists())
             f.mkdir();
     }
