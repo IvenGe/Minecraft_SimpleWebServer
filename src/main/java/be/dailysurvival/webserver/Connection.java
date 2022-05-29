@@ -135,8 +135,8 @@ public class Connection  implements Runnable {
                     "    <title>Not Found</title>\n" +
                     "</head>\n" +
                     "\n" +
-                    "<body><h1><br>\n" +
-                    "404 Error: Page Not Found\n" +
+                    "<body><h1>\n" +
+                    "404 Error: file not found\n" +
                     "</h1></body>\n" +
                     "\n" +
                     "</html>";
