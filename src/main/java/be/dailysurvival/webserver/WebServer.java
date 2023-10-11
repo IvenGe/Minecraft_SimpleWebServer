@@ -8,65 +8,82 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
 public final class WebServer extends JavaPlugin {
+
+    private ServerSocket serverSocket = null;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         getConfig().options().copyDefaults();
         saveDefaultConfig();
+
+        if (!validateConfig()) {
+            getLogger().severe("Invalid configuration, disabling the plugin.");
+            this.setEnabled(false);
+            return;
+        }
+
         createFolder(getConfig().getString("WebSiteFolder"));
-        // Listen for new client connections
-        runnable(getConfig().getInt("port"));
-
-
+        startWebServer(getConfig().getInt("port"));
     }
 
-    private ServerSocket serverSocket = null;
+    private boolean validateConfig() {
+        // Validate config values. Return false if any value is invalid.
+        // For now, just a basic check. Expand as necessary.
+        return getConfig().isInt("port") && getConfig().isString("WebSiteFolder");
+    }
 
-    public void runnable(int port) {
-
-
+    private void startWebServer(int port) {
         try {
             serverSocket = new ServerSocket(port);
+            getLogger().info("Listening for connections on port " + port);
+            
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    acceptConnection();
+                }
+            }.runTaskTimerAsynchronously(this, 20, 10);
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().severe("Error starting the web server: " + e.getMessage());
         }
-        System.out.println("Listening for connections on port" + port);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-
-                StartServer();
-
-            }
-        }.runTaskTimerAsynchronously(this, 20, 10);
     }
 
-    private void StartServer() {
-
-
-        // Accept new client connection
-        Socket connectionSocket = null;
+    private void acceptConnection() {
         try {
-            connectionSocket = serverSocket.accept();
+            Socket connectionSocket = serverSocket.accept();
+            Thread connectionThread = new Thread(new Connection(connectionSocket, getConfig()));
+            connectionThread.start();
+
+            if (getConfig().getBoolean("LogNewConnections", true)) {  // default to true if not found
+                getLogger().info("New connection accepted");
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().severe("Error accepting a new connection: " + e.getMessage());
         }
-
-        // Create new thread to handle client request
-        Thread connectionThread = new Thread(new Connection(connectionSocket, getConfig()));
-
-        // Start the connection thread
-        connectionThread.start();
-        System.out.println("New connection");
-
     }
 
     private void createFolder(String name) {
-        File f = new File(this.getDataFolder() + "/"+ name);
-        if(!f.exists())
-            f.mkdir();
+        File folder = new File(this.getDataFolder(), name);
+        if (!folder.exists()) {
+            if (folder.mkdir()) {
+                getLogger().info("Created folder: " + name);
+            } else {
+                getLogger().warning("Failed to create folder: " + name);
+            }
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        // Close resources on plugin disable
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                getLogger().warning("Error closing server socket: " + e.getMessage());
+            }
+        }
     }
 }
