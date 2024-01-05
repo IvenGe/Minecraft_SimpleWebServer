@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public final class WebServer extends JavaPlugin {
 
@@ -38,7 +39,7 @@ public final class WebServer extends JavaPlugin {
         try {
             serverSocket = new ServerSocket(port);
             getLogger().info("Listening for connections on port " + port);
-            
+
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -56,11 +57,18 @@ public final class WebServer extends JavaPlugin {
             Thread connectionThread = new Thread(new Connection(connectionSocket, getConfig()));
             connectionThread.start();
 
-            if (getConfig().getBoolean("LogNewConnections", true)) {  // default to true if not found
+            if (getConfig().getBoolean("LogNewConnections", true)) {
                 getLogger().info("New connection accepted");
             }
+        } catch (SocketException se) {
+            // Log as warning since socket closure during shutdown is expected
+            if (getConfig().getBoolean("LogNewConnections", true)) {
+            getLogger().warning("Socket closed during accept: " + se.getMessage());
+            }
         } catch (IOException e) {
+            if (getConfig().getBoolean("LogNewConnections", true)) {
             getLogger().severe("Error accepting a new connection: " + e.getMessage());
+            }
         }
     }
 
@@ -78,12 +86,15 @@ public final class WebServer extends JavaPlugin {
     @Override
     public void onDisable() {
         // Close resources on plugin disable
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            try {
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
-            } catch (IOException e) {
-                getLogger().warning("Error closing server socket: " + e.getMessage());
+                getLogger().info("Server socket closed successfully.");
             }
+        } catch (IOException e) {
+             if (getConfig().getBoolean("LogNewConnections", true)) {
+            getLogger().warning("Error closing server socket: " + e.getMessage());
+             }
         }
     }
 }

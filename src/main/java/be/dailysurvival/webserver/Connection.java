@@ -183,18 +183,15 @@ public class Connection  implements Runnable {
      */
     @Override
     public void run() {
-        try {
+        try (Socket socket = this.connectionSocket) {
             // Parse the client request and store the request field keys/values inside of the request HashMap
             parseRequest();
 
             // Send an appropriate response to the client based on the request received by the server
             sendResponse();
-
-            // Close the client connection
-            this.connectionSocket.close();
         } catch (IOException ex) {
-            // If an IOException is caught print out the stack of commands that leads to the error
-            ex.printStackTrace();
+            // Handle or log the exception appropriately
+            //ex.printStackTrace();
         }
     }
 }
