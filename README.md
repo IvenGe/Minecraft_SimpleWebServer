@@ -4,8 +4,8 @@ Just a simple web server inside a Minecraft server (Paper plugin).
 
 ## Requirements
 
-- **Minecraft / Paper 26.1.x** (the current release line)
-- **Java 25** (required by Paper 26.1)
+- **Minecraft / Paper 1.21.x through 26.1.x** (one jar covers the whole range)
+- **Java 21 or newer** (whatever Java your server version already requires)
 
 ## Building
 

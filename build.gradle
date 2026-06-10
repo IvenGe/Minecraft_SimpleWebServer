@@ -14,14 +14,16 @@ repositories {
 }
 
 dependencies {
-    // Paper 26.1.x uses the new "{VERSION}.build.+" version format
-    // (the old 1.x.x-R0.1-SNAPSHOT format ended with 1.21.11)
-    compileOnly "io.papermc.paper:paper-api:26.1.2.build.+"
+    // Compile against the OLDEST supported API (1.21) so the plugin can't
+    // accidentally use newer APIs. The same jar runs on every Paper server
+    // from 1.21.x up to and including 26.1.x.
+    compileOnly "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT"
 }
 
-// Minecraft/Paper 26.1 requires Java 25
+// Java 21 bytecode: required minimum for MC 1.21+, and newer servers
+// (26.1.x runs on Java 25) load Java 21 class files without issues.
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 processResources {
