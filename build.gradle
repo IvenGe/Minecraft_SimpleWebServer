@@ -11,30 +11,17 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT"
+    // Paper 26.1.x uses the new "{VERSION}.build.+" version format
+    // (the old 1.x.x-R0.1-SNAPSHOT format ended with 1.21.11)
+    compileOnly "io.papermc.paper:paper-api:26.1.2.build.+"
 }
 
-def targetJavaVersion = 17
+// Minecraft/Paper 26.1 requires Java 25
 java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release = targetJavaVersion
-    }
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
 }
 
 processResources {

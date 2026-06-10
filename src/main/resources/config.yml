@@ -1,3 +1,9 @@
-port: 80
+# Port the web server listens on.
+# Note: ports below 1024 (like 80) require root/admin privileges on most systems.
+port: 8080
+
+# Folder (inside plugins/WebServer/) that holds the website files.
 WebSiteFolder: Website
+
+# Log every incoming connection to the console.
 LogNewConnections: false
